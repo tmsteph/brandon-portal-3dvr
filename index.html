@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark light" />
+  <title>3DVR Portal</title>
+  <link rel="icon" href="3DVRfavicon.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --accent: #00ffc8;
+      --bg: linear-gradient(135deg, #1e2a38, #2c3e50);
+      --card-bg: rgba(255, 255, 255, 0.08);
+      --text: #ffffff;
+      --text-secondary: #cccccc;
+      --border-radius: 12px;
+      --transition: all 0.3s ease;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      min-height: 100vh;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1, h2, h3 {
+      font-family: 'Poppins', sans-serif;
+      margin-bottom: 1rem;
+    }
+
+    .top-buttons {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      padding: 0.8rem 1rem;
+      background: rgba(0, 0, 0, 0.4);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      backdrop-filter: blur(10px);
+    }
+
+    .top-buttons a {
+      color: var(--text);
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 0.4rem 0.8rem;
+      border-radius: var(--border-radius);
+      background: rgba(255, 255, 255, 0.1);
+      transition: var(--transition);
+    }
+
+    .top-buttons a:hover {
+      background: var(--accent);
+      color: #000;
+      transform: translateY(-2px);
+    }
+
+    header {
+      text-align: center;
+      padding: 4rem 2rem 2rem;
+      max-width: 800px;
+    }
+
+    header h1 {
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      margin-bottom: 1rem;
+    }
+
+    header p {
+      font-size: clamp(1.3rem, 3vw, 1.8rem);
+      color: var(--accent);
+    }
+
+    .info {
+      text-align: center;
+      max-width: 700px;
+      padding: 2rem;
+      margin: 1rem auto;
+      font-size: 1.1rem;
+    }
+
+    .info h2 {
+      font-size: 1.8rem;
+      margin: 1.5rem 0;
+      color: var(--accent);
+    }
+
+    .info strong {
+      color: var(--accent);
+    }
+
+    .grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1.5rem;
+      padding: 2rem;
+      max-width: 1200px;
+      width: 100%;
+    }
+
+    .card {
+      flex: 1 1 calc(30% - 1.5rem);
+      min-width: 240px;
+      max-width: 300px;
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 1.5rem;
+      text-align: center;
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1.1rem;
+      transition: var(--transition);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .card:hover {
+      background: rgba(0, 255, 200, 0.15);
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0, 255, 200, 0.2);
+    }
+
+    footer {
+      margin-top: auto;
+      text-align: center;
+      padding: 2rem 1rem;
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      width: 100%;
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    #auth-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(10px);
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      gap: 1.5rem;
+      padding: 2rem;
+      z-index: 2000;
+      color: var(--text);
+      text-align: center;
+    }
+
+    #auth-modal h2 {
+      font-size: 2rem;
+    }
+
+    #auth-modal p {
+      max-width: 500px;
+    }
+
+    #auth-modal button {
+      padding: 0.8rem 1.5rem;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: var(--transition);
+    }
+
+    #auth-modal button:first-child {
+      background: var(--accent);
+      color: #000;
+    }
+
+    #auth-modal button.guest-btn {
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--text-secondary);
+    }
+
+    #auth-modal button:hover {
+      transform: translateY(-3px);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <div class="top-buttons">
+    <a href="https://3dvr.tech">🏠 3DVR Home</a>
+    <a href="https://3dvr.tech/#subscribe" target="_blank">⭐ Subscribe</a>
+    <a href="https://3dvr-portal.vercel.app/free-trial.html" target="_blank">🎁 Free Plan</a>
+    <a href="https://github.com/tmsteph/3dvr-portal" target="_blank">🚀 Contribute on GitHub</a>
+    <a href="https://portal.3dvr.tech/share.html">📱 Share via QR</a>
+  </div>
+
+  <!-- Main Header -->
+  <header>
+    <h1>Welcome to the 3DVR Portal</h1>
+    <p>Earn, Play, and Build the Future!</p>
+  </header>
+
+  <!-- Info Section -->
+  <div class="info">
+    <h2>🌟 Earn Points. Unlock Rewards.</h2>
+    <p>At 3DVR, everything you do helps you grow!</p>
+    <p><strong>Earn points</strong> by playing games, participating in chats, and subscribing to support our mission.</p>
+    <p>Use your points to unlock exclusive educational content, special services, and even future cash-out opportunities!</p>
+    <p>🎯 Build your profile, contribute to the community, and be rewarded along the way.</p>
+  </div>
+
+  <!-- App Grid -->
+  <div class="grid">
+    <a href="notes.html" class="card">📝 Shared Notes</a>
+    <a href="chat.html" class="card">💬 Group Chat</a>
+    <a href="tasks.html" class="card">✅ Task Board</a>
+    <a href="games.html" class="card">🎮 Mini Game Hub</a>
+    <a href="profile.html" class="card">👤 Profile Wallet</a>
+    <a href="education.html" class="card">📚 Education Hub</a>
+    <a href="rewards.html" class="card">💎 Earn Points</a>
+    <a href="website-builder.html" class="card">🛠️ Website Builder</a>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    3DVR.Tech &copy; 2025 - Open Web for Everyone | 
+    <a href="https://3dvr.tech">3DVR.Tech</a> | 
+    <a href="https://github.com/tmsteph/3dvr-portal">Contribute on GitHub</a>
+  </footer>
+
+  <!-- Authentication Modal -->
+  <div id="auth-modal">
+    <h2>Sign In to Save Your Progress</h2>
+    <p>Create an account to sync your points across all your devices!</p>
+    <button onclick="window.location.href='sign-in.html'">Sign In / Create Account</button>
+    <button class="guest-btn" onclick="continueAsGuest()">Continue as Guest</button>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gun/sea.js"></script>
+  <script>
+    // Conexión a Gun
+    const gun = Gun(['https://gun-manhattan.herokuapp.com/gun']);
+    const user = gun.user();
+
+    // Verificar autenticación al cargar
+    window.addEventListener('load', () => {
+      const signedIn = localStorage.getItem('signedIn');
+      const guest = localStorage.getItem('guest');
+
+      if (!signedIn && !guest) {
+        document.getElementById('auth-modal').style.display = 'flex';
+      } else {
+        // Si ya está autenticado o como invitado, no mostrar modal
+      }
+    });
+
+    // Continuar como invitado
+    function continueAsGuest() {
+      localStorage.setItem('guest', 'true');
+      document.getElementById('auth-modal').style.display = 'none';
+    }
+
+    // Guardar datos del usuario (ej: puntos, perfil)
+    function saveUserData(data) {
+      if (localStorage.getItem('signedIn') === 'true') {
+        const username = localStorage.getItem('username');
+        user.get('profiles').get(username).put(data);
+      }
+    }
+
+    // Cargar datos del usuario
+    function loadUserData(callback) {
+      const username = localStorage.getItem('username');
+      if (username) {
+        user.get('profiles').get(username).on((data) => {
+          if (data) callback(data);
+        });
+      }
+    }
+
+    // Ejemplo: guardar puntos (se llamaría desde otro módulo)
+    // saveUserData({ points: 150, level: 5, lastActive: Date.now() });
+
+    // Ejemplo: cargar puntos
+    // loadUserData((profile) => console.log('Perfil:', profile));
+  </script>
+  <script src="navbar.js"></script>
+
+</body>
+</html>

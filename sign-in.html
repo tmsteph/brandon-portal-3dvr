@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark" />
+  <title>3DVR Portal • Sign In</title>
+  <link rel="icon" href="3DVRfavicon.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --accent: #00ffc8;
+      --bg: linear-gradient(135deg, #1e2a38, #2c3e50);
+      --card-bg: rgba(255, 255, 255, 0.06);
+      --input-bg: rgba(255, 255, 255, 0.1);
+      --text: #ffffff;
+      --text-secondary: #cccccc;
+      --border-radius: 12px;
+      --transition: all 0.3s ease;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      margin: 0;
+      text-align: center;
+    }
+
+    h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: clamp(2rem, 5vw, 2.8rem);
+      margin-bottom: 0.5rem;
+      background: linear-gradient(to right, #00ffc8, #00aaff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    p {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+      max-width: 400px;
+    }
+
+    .form-container {
+      background: var(--card-bg);
+      padding: 2.5rem;
+      border-radius: var(--border-radius);
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    input {
+      width: 100%;
+      padding: 0.9rem 1rem;
+      margin: 1rem 0;
+      background: var(--input-bg);
+      border: none;
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 1rem;
+      outline: none;
+      transition: var(--transition);
+    }
+
+    input::placeholder {
+      color: var(--text-secondary);
+    }
+
+    input:focus {
+      box-shadow: 0 0 0 2px var(--accent);
+    }
+
+    button {
+      width: 100%;
+      padding: 0.9rem;
+      margin: 1.2rem 0 0;
+      background: var(--accent);
+      color: #000;
+      font-weight: 600;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    button:hover {
+      background: #00ccaa;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 255, 200, 0.3);
+    }
+
+    .guest-btn {
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--text-secondary);
+      margin-top: 1rem;
+    }
+
+    .guest-btn:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .top-link {
+      position: absolute;
+      top: 1.5rem;
+      left: 1.5rem;
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+    }
+
+    .top-link:hover {
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Back to Home -->
+  <a href="https://3dvr.tech" class="top-link">← Back to 3DVR</a>
+
+  <!-- Main Content -->
+  <div class="form-container">
+    <h1>Sign In / Create Account</h1>
+    <p>Access your profile, sync progress, and earn rewards.</p>
+
+    <input type="text" id="username" placeholder="Choose a username" autocomplete="username" />
+    <input type="password" id="password" placeholder="Create a password" autocomplete="current-password" />
+
+    <button onclick="signIn()">Sign In / Create</button>
+    <button class="guest-btn" onclick="continueAsGuest()">Continue as Guest</button>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gun/sea.js"></script>
+  <script>
+    const gun = Gun(['https://gun-manhattan.herokuapp.com/gun']);
+    const user = gun.user();
+
+    function signIn() {
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      if (!username || !password) {
+        alert("Please enter both username and password.");
+        return;
+      }
+
+      const alias = username + "@3dvr";
+      console.log("🛠️ Attempting to authorize user:", alias);
+
+      // Intentar iniciar sesión
+      user.auth(alias, password, loginAck => {
+        if (loginAck.err) {
+          console.warn("❌ Login failed:", loginAck.err);
+          console.log("Login failed. Trying to create a new account...");
+          
+          // Intentar crear cuenta
+          user.create(alias, password, createAck => {
+            if (createAck.err) {
+              if (createAck.err.includes("User already created")) {
+                alert("⚠️ That username is taken. Please check your password or try logging in.");
+                console.warn("⚠️ User exists, password is likely incorrect.");
+              } else {
+                console.error("❌ Error creating account:", createAck.err);
+                alert("❌ Account creation failed: " + createAck.err);
+              }
+              return;
+            }
+            console.log("✅ User created:", alias);
+            
+            // Autenticar después de crear
+            setTimeout(() => {
+              user.auth(alias, password, authAck => {
+                if (authAck.err) {
+                  console.error("❌ Auth after creation failed:", authAck.err);
+                  alert("⚠️ Auth failed after creating account. Please try again.");
+                } else {
+                  console.log("✅ Authenticated after account creation.");
+                  finishLogin(username, alias, password);
+                }
+              });
+            }, 500);
+          });
+
+        } else {
+          console.log("✅ Logged in existing user.");
+          finishLogin(username, alias, password);
+        }
+      });
+    }
+    
+    function finishLogin(username, alias, password) {
+      localStorage.setItem('signedIn', 'true');
+      localStorage.setItem('username', username);
+      localStorage.setItem('alias', alias);
+      localStorage.setItem('password', password);
+      window.location.href = 'index.html';
+    }
+
+    function continueAsGuest() {
+      localStorage.setItem('guest', 'true');
+      window.location.href = 'index.html';
+    }
+  </script>
+
+</body>
+</html>

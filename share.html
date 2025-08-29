@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark light" />
+  <title>Share 3dvr.tech</title>
+  <link rel="icon" href="https://fav.farm/🚀" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@500;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+  <style>
+    :root {
+      --accent: #00ffc8;
+      --bg: linear-gradient(135deg, #1e2a38, #2c3e50);
+      --text: #ffffff;
+      --text-secondary: #cccccc;
+      --card-bg: rgba(255, 255, 255, 0.06);
+      --border-radius: 12px;
+      --transition: all 0.3s ease;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 1rem;
+    }
+
+    h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: clamp(2rem, 5vw, 2.8rem);
+      margin: 0.5rem 0;
+      background: linear-gradient(to right, #00ffc8, #00aaff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    p {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+      max-width: 500px;
+      margin: 0.5rem 0;
+    }
+
+    .qr-container {
+      margin: 1.5rem 0;
+    }
+
+    #qr {
+      width: 200px;
+      height: 200px;
+      border-radius: var(--border-radius);
+      filter: drop-shadow(0 0 10px var(--accent));
+      transition: var(--transition);
+      cursor: pointer;
+    }
+
+    #qr:hover {
+      transform: scale(1.03);
+      filter: drop-shadow(0 0 15px var(--accent));
+    }
+
+    .back-btn {
+      background: var(--accent);
+      color: #000;
+      padding: 0.8rem 1.6rem;
+      border-radius: 8px;
+      font-weight: 600;
+      text-decoration: none;
+      font-size: 1.1rem;
+      margin-top: 1rem;
+      display: inline-block;
+      transition: var(--transition);
+    }
+
+    .back-btn:hover {
+      background: #00ccaa;
+      transform: translateY(-2px);
+    }
+
+    .link-text {
+      color: var(--accent);
+      text-decoration: underline;
+      font-weight: 500;
+    }
+
+    .link-text:hover {
+      color: #00ccaa;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Share the Vision</h1>
+
+  <p>
+    Scan or tap to support <span class="link-text">3dvr.tech</span><br>
+    and help build the open-source future.
+  </p>
+
+  <div class="qr-container">
+    <a href="https://3dvr.tech/#subscribe" id="link">
+      <canvas id="qr"></canvas>
+    </a>
+  </div>
+
+  <p>
+    or visit<br>
+    <a href="https://3dvr.tech/#subscribe" class="link-text">
+      3dvr.tech/#subscribe
+    </a>
+  </p>
+
+  <a href="https://portal.3dvr.tech" class="back-btn">← Back to portal.3dvr.tech</a>
+
+  <p class="text-xs text-gray-500 mt-3">
+    Built with 💡 by 
+    <a href="https://tmsteph.com" class="link-text">tmsteph</a>
+  </p>
+
+  <script>
+    const qr = new QRious({
+      element: document.getElementById('qr'),
+      value: 'https://3dvr.tech/#subscribe',
+      size: 200,
+      foreground: '#00ffc8',
+      background: '#1e2a38'
+    });
+
+    document.getElementById('qr').addEventListener('click', () => {
+      window.location.href = 'https://3dvr.tech/#subscribe';
+    });
+  </script>
+
+</body>
+</html>

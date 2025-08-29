@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark light" />
+  <title>📝 3DVR Notes</title>
+  <link rel="icon" href="3DVRfavicon.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --accent: #00ffc8;
+      --bg: linear-gradient(135deg, #1e2a38, #2c3e50);
+      --sidebar-bg: rgba(255, 255, 255, 0.04);
+      --card-bg: rgba(255, 255, 255, 0.06);
+      --text: #ffffff;
+      --text-secondary: #cccccc;
+      --border-radius: 12px;
+      --transition: all 0.3s ease;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.8rem 1.5rem;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .navbar a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      margin: 0 0.5rem;
+      font-size: 0.95rem;
+      padding: 0.4rem 0.8rem;
+      border-radius: 8px;
+      transition: var(--transition);
+    }
+
+    .navbar a:hover, .navbar a.active {
+      background: var(--accent);
+      color: #000;
+    }
+
+    .container {
+      display: flex;
+      flex: 1;
+      height: calc(100vh - 60px);
+    }
+
+    .sidebar {
+      width: 280px;
+      background: var(--sidebar-bg);
+      padding: 1.5rem;
+      overflow-y: auto;
+      border-right: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .sidebar h2 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      color: var(--accent);
+    }
+
+    .sidebar input {
+      width: 100%;
+      padding: 0.6rem;
+      margin-bottom: 1rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+
+    .sidebar input::placeholder {
+      color: var(--text-secondary);
+    }
+
+    .sidebar ul {
+      list-style: none;
+      margin-bottom: 2rem;
+    }
+
+    .sidebar li {
+      padding: 0.5rem;
+      margin: 0.2rem 0;
+      cursor: pointer;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      display: flex;
+      justify-content: space-between;
+      transition: var(--transition);
+    }
+
+    .sidebar li:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar li.active {
+      background: var(--accent);
+      color: #000;
+    }
+
+    .sidebar .delete {
+      opacity: 0.6;
+      font-size: 0.8rem;
+    }
+
+    .sidebar .delete:hover {
+      opacity: 1;
+      color: #ff5555;
+    }
+
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 2rem;
+      overflow-y: auto;
+    }
+
+    .main h2 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+      color: var(--text-secondary);
+    }
+
+    #note-content {
+      flex: 1;
+      padding: 1rem;
+      margin-top: 1rem;
+      background: var(--card-bg);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 1.1rem;
+      resize: none;
+      outline: none;
+    }
+
+    #note-content:focus {
+      box-shadow: 0 0 0 2px var(--accent);
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div>
+      <a href="index.html">🏠 Home</a>
+      <a href="tasks.html">✅ Tasks</a>
+      <a href="notes.html" class="active">📝 Notes</a>
+      <a href="chat.html">💬 Chat</a>
+      <a href="profile.html">👤 Profile</a>
+    </div>
+    <div style="font-size: 0.9rem;">3DVR Portal</div>
+  </nav>
+
+  <div class="container">
+    <aside class="sidebar">
+      <h2>📂 Folders</h2>
+      <input type="text" id="new-folder" placeholder="Add Folder + Enter">
+      <ul id="folders"></ul>
+
+      <h2>📝 Notes</h2>
+      <input type="text" id="new-note" placeholder="Add Note + Enter" disabled>
+      <ul id="notes"></ul>
+    </aside>
+
+    <main class="main">
+      <h2 id="note-title">Select a note...</h2>
+      <textarea id="note-content" placeholder="Start typing your note..." disabled></textarea>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+  <script>
+    const gun = Gun(['https://gun-manhattan.herokuapp.com/gun']);
+    const user = gun.user();
+    const folders = gun.get('3dvr-notes-folders');
+    const notes = gun.get('3dvr-notes-data');
+
+    let currentFolder = null;
+    let currentNoteId = null;
+    let signedIn = localStorage.getItem('signedIn') === 'true';
+
+    // Verificar autenticación
+    if (!signedIn && !localStorage.getItem('guest')) {
+      alert("Please sign in or continue as guest to use notes.");
+      window.location.href = 'sign-in.html';
+    }
+
+    // --- FOLDERS ---
+    folders.map().on((data, id) => {
+      if (!data || data.deleted) {
+        document.getElementById(id)?.remove();
+        if (currentFolder === id) {
+          currentFolder = null;
+          document.getElementById('new-note').disabled = true;
+          document.getElementById('notes').innerHTML = '';
+          document.getElementById('note-title').textContent = "Select a note...";
+          document.getElementById('note-content').value = '';
+          document.getElementById('note-content').disabled = true;
+        }
+        return;
+      }
+
+      let li = document.getElementById(id);
+      if (!li) {
+        li = document.createElement('li');
+        li.id = id;
+        li.onclick = () => selectFolder(id);
+        document.getElementById('folders').appendChild(li);
+      }
+
+      li.innerHTML = `<span class="editable">${data.name}</span> <span class="delete">🗑</span>`;
+      li.classList.toggle('active', id === currentFolder);
+
+      li.querySelector('.delete').onclick = (e) => {
+        e.stopPropagation();
+        if (confirm("Delete this folder and all its notes?")) {
+          folders.get(id).put({ deleted: true, name: data.name });
+        }
+      };
+
+      li.querySelector('.editable').ondblclick = () =>
+        enableEdit(li.querySelector('.editable'), (newName) => {
+          if (newName) folders.get(id).put({ name: newName });
+        });
+    });
+
+    document.getElementById('new-folder').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const name = e.target.value.trim();
+        if (name) {
+          folders.set({ name });
+          e.target.value = '';
+        }
+      }
+    });
+
+    function selectFolder(id) {
+      currentFolder = id;
+      document.getElementById('new-note').disabled = false;
+      document.querySelectorAll('#folders li').forEach(li => li.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      renderNotes();
+    }
+
+    // --- NOTES ---
+    function renderNotes() {
+      const ul = document.getElementById('notes');
+      ul.innerHTML = '';
+      const noteList = [];
+
+      notes.map().once((data, id) => {
+        if (!data || data.deleted || data.folder !== currentFolder) return;
+        noteList.push({ id, data });
+      }, () => {
+        // Ordenar por fecha (más reciente primero)
+        noteList.sort((a, b) => (b.data.updated || 0) - (a.data.updated || 0));
+        noteList.forEach(({ id, data }) => {
+          const li = document.createElement('li');
+          li.innerHTML = `<span class="editable">${data.title}</span> <span class="delete">🗑</span>`;
+          li.onclick = () => openNote(id);
+          ul.appendChild(li);
+
+          li.querySelector('.delete').onclick = (e) => {
+            e.stopPropagation();
+            if (confirm("Delete this note?")) {
+              notes.get(id).put({ deleted: true, title: data.title, folder: data.folder });
+              if (currentNoteId === id) {
+                currentNoteId = null;
+                document.getElementById('note-title').textContent = "Select a note...";
+                document.getElementById('note-content').value = '';
+                document.getElementById('note-content').disabled = true;
+              }
+            }
+          };
+
+          li.querySelector('.editable').ondblclick = () =>
+            enableEdit(li.querySelector('.editable'), (newTitle) => {
+              if (newTitle) notes.get(id).put({ title: newTitle, updated: Date.now() });
+            });
+        });
+      });
+    }
+
+    document.getElementById('new-note').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const title = e.target.value.trim();
+        if (title && currentFolder) {
+          const id = Gun.text.random(8);
+          notes.get(id).put({
+            title,
+            folder: currentFolder,
+            content: "",
+            created: Date.now(),
+            updated: Date.now()
+          });
+          e.target.value = '';
+        }
+      }
+    });
+
+    function openNote(id) {
+      currentNoteId = id;
+      notes.get(id).on((data) => {
+        if (!data || data.deleted) {
+          if (currentNoteId === id) {
+            currentNoteId = null;
+            document.getElementById('note-title').textContent = "Note deleted";
+            document.getElementById('note-content').value = '';
+            document.getElementById('note-content').disabled = true;
+          }
+          return;
+        }
+        document.getElementById('note-title').textContent = data.title;
+        document.getElementById('note-content').value = data.content || '';
+        document.getElementById('note-content').disabled = false;
+      });
+    }
+
+    document.getElementById('note-content').addEventListener('input', () => {
+      if (!currentNoteId) return;
+      const content = document.getElementById('note-content').value;
+      notes.get(currentNoteId).put({ content, updated: Date.now() });
+    });
+
+    // --- Inline Editing Helper ---
+    function enableEdit(el, callback) {
+      const original = el.textContent;
+      el.setAttribute('contenteditable', 'true');
+      el.focus();
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      range.collapse(false);
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+
+      function finish(save) {
+        el.removeAttribute('contenteditable');
+        el.removeEventListener('blur', onBlur);
+        el.removeEventListener('keydown', onKey);
+        const text = el.textContent.trim();
+        if (save && text) callback(text);
+        else if (!text) el.textContent = original;
+      }
+
+      function onBlur() { finish(true); }
+      function onKey(e) {
+        if (e.key === 'Enter') { e.preventDefault(); finish(true); }
+        if (e.key === 'Escape') { finish(false); }
+      }
+
+      el.addEventListener('blur', onBlur);
+      el.addEventListener('keydown', onKey);
+    }
+
+    // Inicializar
+    window.addEventListener('load', () => {
+      const firstFolder = document.querySelector('#folders li');
+      if (firstFolder) firstFolder.click();
+    });
+  </script>
+</body>
+</html>
